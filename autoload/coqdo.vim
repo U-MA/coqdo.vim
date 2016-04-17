@@ -36,12 +36,6 @@ function! s:read_messages() abort " {{{
   while !empty(buf)
     let buf = s:proc.stdout.read(-1, 100)
 
-    " buf contains some '^@'(null char).
-    " I want to erase them.
-    redir => bufvar
-    silent echo buf
-    redir END
-
     let buflist = split(buf, '[[:cntrl:]]')
     call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
     call filter(buflist, "match(v:val, 'Coq < ') == -1")
