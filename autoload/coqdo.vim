@@ -1,6 +1,7 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+let s:oldlinenr = 0
 let s:curlinenr = 0
 
 function! coqdo#start() abort " {{{
@@ -30,21 +31,31 @@ function! coqdo#start() abort " {{{
 endfunction "}}}
 
 function! s:read_messages() abort " {{{
-  let all = ''
+  let message_list = []
   let buf = '>'
   while !empty(buf)
     let buf = s:proc.stdout.read(-1, 100)
-    if match(buf, "^Coq <") == -1
-      let all .= buf
-    endif
+
+    " buf contains some '^@'(null char).
+    " I want to erase them.
+    redir => bufvar
+    silent echo buf
+    redir END
+
+    let buflist = split(buf, '[[:cntrl:]]')
+    call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
+    call filter(buflist, "match(v:val, 'Coq < ') == -1")
+    call filter(buflist, '!empty(v:val)')
+    call extend(message_list, buflist)
   endwhile
-  let message = split(all, "[[:cntrl:]]")
-  return message[:len(message)-2]
+
+  return message_list
 endfunction " }}}
 
 function! s:print_message(lines) abort " {{{
   let winnr = winnr()
   execute bufwinnr(s:bufnr) 'wincmd w'
+  silent %delete _
   call setline(1, a:lines)
   execute winnr 'wincmd w'
 endfunction " }}}
@@ -65,9 +76,10 @@ function! s:goto(linenr) abort " {{{
     return
   endif
 
+  let s:oldlinenr = s:curlinenr
   let s:curlinenr = a:linenr
 
-  let line = getline(0, a:linenr)
+  let line = getline(s:oldlinenr+1, a:linenr)
   let input = join(line, "\n") . "\n"
   call s:proc.stdin.write(input)
   let output = s:read_messages()
