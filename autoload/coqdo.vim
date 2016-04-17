@@ -39,7 +39,7 @@ function! s:read_messages() abort " {{{
   let message_list = []
   let buf = '>'
   while !empty(buf)
-    let buf = s:proc.stdout.read(-1, 100)
+    let buf = s:proc.stdout.read(-1, 150)
 
     let buflist = split(buf, '[[:cntrl:]]')
     call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
