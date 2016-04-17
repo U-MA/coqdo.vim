@@ -37,10 +37,15 @@ endfunction "}}}
 
 function! s:read_messages() abort " {{{
   let message_list = []
+  let buf = ''
   while 1
-    let buf = s:proc.stdout.read(-1, 100)
-    if empty(buf)
-      break
+    if match(buf, '\(Coq < \)\+$') != -1
+      let buf = s:proc.stdout.read(-1, 100)
+      if empty(buf)
+        break
+      endif
+    else
+      let buf = s:proc.stdout.read(-1, 100)
     endif
 
     let buflist = split(buf, '[[:cntrl:]]')
