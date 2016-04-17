@@ -25,9 +25,11 @@ function! coqdo#start() abort " {{{
 
   command! -buffer CoqdoQuit call s:quit()
   command! -buffer CoqdoGoto call s:goto(<line2>)
+  command! -buffer CoqdoClear call s:clear()
 
   nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
   nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
+  nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
 endfunction "}}}
 
 function! s:read_messages() abort " {{{
@@ -78,6 +80,19 @@ function! s:goto(linenr) abort " {{{
   call s:proc.stdin.write(input)
   let output = s:read_messages()
   call s:print_message(output)
+endfunction " }}}
+
+function! s:clear() abort " {{{
+  call s:proc.stdin.write("Quit.\n")
+  call s:proc.waitpid()
+
+  let s:proc = vimproc#popen2('coqtop')
+
+  let s:oldlinenr = 0
+  let s:curlinenr = 0
+
+  let message_list = s:read_messages()
+  call s:print_message(message_list)
 endfunction " }}}
 
 let &cpo = s:save_cpo
