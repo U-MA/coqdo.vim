@@ -88,7 +88,6 @@ function! s:goto(linenr) abort " {{{
     call matchdelete(s:match_id)
   endif
   let s:match_id = matchadd('coqdoEndLine', '\%' . s:curlinenr . 'l')
-  echo s:match_id
 endfunction " }}}
 
 function! s:clear() abort " {{{
