@@ -49,7 +49,8 @@ function! s:read_messages() abort " {{{
     endif
 
     let buflist = split(buf, '[[:cntrl:]]')
-    call map(buflist, "matchstr(v:val, '\\(\\(.\+ < \\)*\\)\\zs.\\+')")
+    " TODO 'theorem_name < theorem_name < fst' => 'fst'
+    call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
     call filter(buflist, "match(v:val, '.\\+ < ') == -1")
     call extend(message_list, buflist)
   endwhile
