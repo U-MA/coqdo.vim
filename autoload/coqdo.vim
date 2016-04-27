@@ -51,7 +51,6 @@ function! s:read_messages() abort " {{{
     let buflist = split(buf, '[[:cntrl:]]')
     call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
     call filter(buflist, "match(v:val, 'Coq < ') == -1")
-    call filter(buflist, '!empty(v:val)')
     call extend(message_list, buflist)
   endwhile
 
