@@ -39,7 +39,7 @@ function! s:read_messages() abort " {{{
   let message_list = []
   let buf = ''
   while 1
-    if match(buf, '\(Coq < \)\+$') != -1
+    if match(buf, '\(.\+ < \)\+$') != -1
       let buf = s:proc.stdout.read(-1, 100)
       if empty(buf)
         break
@@ -49,8 +49,8 @@ function! s:read_messages() abort " {{{
     endif
 
     let buflist = split(buf, '[[:cntrl:]]')
-    call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
-    call filter(buflist, "match(v:val, 'Coq < ') == -1")
+    call map(buflist, "matchstr(v:val, '\\(\\(.\+ < \\)*\\)\\zs.\\+')")
+    call filter(buflist, "match(v:val, '.\\+ < ') == -1")
     call extend(message_list, buflist)
   endwhile
 
