@@ -26,11 +26,16 @@ function! coqdo#start() abort " {{{
 
   command! -buffer CoqdoQuit call s:quit()
   command! -buffer CoqdoGoto call s:goto(<line2>)
-  command! -buffer CoqdoClear call s:clear()
+  command! -buffer CoqdoClear call s:clear(0)
 
   nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
   nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
   nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
+
+  augroup Coqdo
+    autocmd!
+    autocmd InsertEnter <buffer> call s:backward(line('.'))
+  augroup END
 
   hi def link coqdoEndLine Folded
 endfunction "}}}
@@ -97,7 +102,7 @@ function! s:goto(linenr) abort " {{{
   let s:match_id = matchadd('coqdoEndLine', '\%' . s:curlinenr . 'l')
 endfunction " }}}
 
-function! s:clear() abort " {{{
+function! s:clear(is_silent) abort " {{{
   call s:proc.stdin.write("Quit.\n")
   call s:proc.waitpid()
 
@@ -107,11 +112,32 @@ function! s:clear() abort " {{{
   let s:curlinenr = 0
 
   let message_list = s:read_messages()
-  call s:print_message(message_list)
+  if !a:is_silent
+    call s:print_message(message_list)
+  endif
 
   if s:match_id > 0
     let s:match_id = matchdelete(s:match_id)
   endif
+endfunction " }}}
+
+function! s:backward(linenr) abort " {{{
+  if a:linenr > s:curlinenr
+    return
+  endif
+
+  call s:clear(1)
+
+  let s:curlinenr = a:linenr - 1 " TODO how do a:linenr = 0 ?
+  if s:match_id > 0
+    call matchdelete(s:match_id)
+  endif
+  let s:match_id = matchadd('coqdoEndLine', '\%' . s:curlinenr . 'l')
+
+  let line = getline(s:oldlinenr+1, s:curlinenr)
+  let input = join(line, "\n") . "\n"
+  call s:proc.stdin.write(input)
+  let output = s:read_messages()
 endfunction " }}}
 
 let &cpo = s:save_cpo
