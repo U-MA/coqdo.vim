@@ -27,10 +27,14 @@ function! coqdo#start() abort " {{{
   command! -buffer CoqdoQuit call s:quit()
   command! -buffer CoqdoGoto call s:goto(<line2>)
   command! -buffer CoqdoClear call s:clear(0)
+  command! -buffer CoqdoForward call s:forward()
+  command! -buffer CoqdoBackward call s:backward_one()
 
   nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
   nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
   nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
+  nnoremap <buffer> <silent> <LocalLeader>j :<C-u>CoqdoForward<CR>
+  nnoremap <buffer> <silent> <LocalLeader>k :<C-u>CoqdoBackward<CR>
 
   augroup Coqdo
     autocmd!
@@ -119,6 +123,22 @@ function! s:clear(is_silent) abort " {{{
   if s:match_id > 0
     let s:match_id = matchdelete(s:match_id)
   endif
+endfunction " }}}
+
+function! s:forward() abort " {{{
+  if s:curlinenr == line('$')
+    return
+  endif
+
+  call s:goto(s:curlinenr + 1)
+endfunction " }}}
+
+function! s:backward_one() abort " {{{
+  if s:curlinenr == 0
+    return
+  endif
+
+  call s:backward(s:curlinenr)
 endfunction " }}}
 
 function! s:backward(linenr) abort " {{{
