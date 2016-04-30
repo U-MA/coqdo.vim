@@ -6,14 +6,6 @@ let s:curlinenr = 0
 let s:match_id  = 0
 
 function! coqdo#start() abort " {{{
-  if !executable('coqtop')
-    let msg = 'cannot execute coqtop'
-    echohl ErrorMsg | echo msg | echohl None
-    finish
-  endif
-
-  " TODO error print: if vimproc do not exist.
-
   let s:proc = vimproc#popen2('coqtop')
 
   rightbelow vnew
@@ -23,25 +15,6 @@ function! coqdo#start() abort " {{{
 
   let message_list = s:read_messages()
   call s:print_message(message_list)
-
-  command! -buffer CoqdoQuit call s:quit()
-  command! -buffer CoqdoGoto call s:goto(<line2>)
-  command! -buffer CoqdoClear call s:clear(0)
-  command! -buffer CoqdoForward call s:forward()
-  command! -buffer CoqdoBackward call s:backward_one()
-
-  nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
-  nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
-  nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
-  nnoremap <buffer> <silent> <LocalLeader>j :<C-u>CoqdoForward<CR>
-  nnoremap <buffer> <silent> <LocalLeader>k :<C-u>CoqdoBackward<CR>
-
-  augroup Coqdo
-    autocmd!
-    autocmd InsertEnter <buffer> call s:backward(line('.'))
-  augroup END
-
-  hi def link coqdoEndLine Folded
 endfunction "}}}
 
 function! s:read_messages() abort " {{{
@@ -75,7 +48,7 @@ function! s:print_message(lines) abort " {{{
   execute winnr 'wincmd w'
 endfunction " }}}
 
-function! s:quit() abort " {{{
+function! coqdo#quit() abort " {{{
   call s:proc.stdin.write("Quit.\n")
   call s:proc.waitpid()
 
@@ -86,7 +59,7 @@ function! s:quit() abort " {{{
   execute curwinnr 'wincmd w'
 endfunction " }}}
 
-function! s:goto(linenr) abort " {{{
+function! coqdo#goto(linenr) abort " {{{
   if a:linenr < s:curlinenr
     return
   endif
@@ -106,7 +79,7 @@ function! s:goto(linenr) abort " {{{
   let s:match_id = matchadd('coqdoEndLine', '\%' . s:curlinenr . 'l')
 endfunction " }}}
 
-function! s:clear(is_silent) abort " {{{
+function! coqdo#clear(is_silent) abort " {{{
   call s:proc.stdin.write("Quit.\n")
   call s:proc.waitpid()
 
@@ -125,28 +98,28 @@ function! s:clear(is_silent) abort " {{{
   endif
 endfunction " }}}
 
-function! s:forward() abort " {{{
+function! coqdo#forward() abort " {{{
   if s:curlinenr == line('$')
     return
   endif
 
-  call s:goto(s:curlinenr + 1)
+  call coqdo#goto(s:curlinenr + 1)
 endfunction " }}}
 
-function! s:backward_one() abort " {{{
+function! coqdo#backward_one() abort " {{{
   if s:curlinenr == 0
     return
   endif
 
-  call s:backward(s:curlinenr)
+  call coqdo#backward(s:curlinenr)
 endfunction " }}}
 
-function! s:backward(linenr) abort " {{{
+function! coqdo#backward(linenr) abort " {{{
   if a:linenr > s:curlinenr
     return
   endif
 
-  call s:clear(1)
+  call coqdo#clear(1)
 
   let s:curlinenr = a:linenr - 1 " TODO how do a:linenr = 0 ?
   if s:match_id > 0
