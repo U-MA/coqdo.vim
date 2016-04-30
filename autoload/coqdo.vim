@@ -57,6 +57,22 @@ function! coqdo#quit() abort " {{{
   execute winnr 'wincmd w'
   close
   execute curwinnr 'wincmd w'
+
+  delcommand CoqdoQuit
+  delcommand CoqdoGoto
+  delcommand CoqdoClear
+  delcommand CoqdoForward
+  delcommand CoqdoBackward
+
+  nunmap <buffer> <LocalLeader>q
+  nunmap <buffer> <LocalLeader>g
+  nunmap <buffer> <LocalLeader>c
+  nunmap <buffer> <LocalLeader>j
+  nunmap <buffer> <LocalLeader>k
+
+  augroup Coqdo
+    autocmd!
+  augroup END
 endfunction " }}}
 
 function! coqdo#goto(linenr) abort " {{{
