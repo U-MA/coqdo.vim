@@ -73,6 +73,8 @@ function! coqdo#quit() abort " {{{
   augroup Coqdo
     autocmd!
   augroup END
+
+  unlet g:coqdo_started
 endfunction " }}}
 
 function! coqdo#goto(linenr) abort " {{{

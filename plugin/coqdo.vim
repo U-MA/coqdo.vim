@@ -4,6 +4,13 @@ set cpo&vim
 command! Coqdo call s:setup()
 
 function! s:setup() abort " {{{
+  if exists('g:coqdo_started')
+    let msg = 'Coqdo is already started'
+    echohl ErrorMsg | echo msg | echohl None
+    return
+  endif
+
+  let g:coqdo_started = 1
 
   " Check coqtop command {{{
   if !executable('coqtop')
