@@ -74,6 +74,13 @@ function! coqdo#quit() abort " {{{
     autocmd!
   augroup END
 
+  if s:match_id > 0
+    call matchdelete(s:match_id)
+  endif
+  let s:match_id = 0
+  let s:oldlinenr = 0
+  let s:curlinenr = 0
+
   unlet g:coqdo_started
 endfunction " }}}
 
