@@ -158,5 +158,12 @@ function! coqdo#backward(linenr) abort " {{{
   let output = s:read_messages()
 endfunction " }}}
 
+function! coqdo#search_about(args) abort " {{{
+  let input = 'SearchAbout "' . a:args . '".' . "\n"
+  call s:proc.stdin.write(input)
+  let output = s:read_messages()
+  call s:print_message(output)
+endfunction " }}}
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
