@@ -5,18 +5,6 @@ let s:oldlinenr = 0
 let s:curlinenr = 0
 let s:match_id  = 0
 
-function! coqdo#start() abort " {{{
-  let s:proc = vimproc#popen2('coqtop')
-
-  rightbelow vnew
-  let s:bufnr = bufnr('%')
-  setlocal buftype=nofile noswapfile "TODO set other options
-  wincmd p
-
-  let message_list = s:read_messages()
-  call s:print_message(message_list)
-endfunction "}}}
-
 function! s:read_messages() abort " {{{
   let message_list = []
   let buf = ''
@@ -47,6 +35,18 @@ function! s:print_message(lines) abort " {{{
   call setline(1, a:lines)
   execute winnr 'wincmd w'
 endfunction " }}}
+
+function! coqdo#start() abort " {{{
+  let s:proc = vimproc#popen2('coqtop')
+
+  rightbelow vnew
+  let s:bufnr = bufnr('%')
+  setlocal buftype=nofile noswapfile "TODO set other options
+  wincmd p
+
+  let message_list = s:read_messages()
+  call s:print_message(message_list)
+endfunction "}}}
 
 function! coqdo#quit() abort " {{{
   call s:proc.stdin.write("Quit.\n")
