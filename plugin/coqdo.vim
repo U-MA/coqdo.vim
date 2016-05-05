@@ -16,10 +16,17 @@ function! s:setup() abort " {{{
   if !executable('coqtop')
     let msg = 'cannot execute coqtop'
     echohl ErrorMsg | echo msg | echohl None
-    finish
+    return
   end " }}}
 
-  " TODO error print: if vimproc do not exist.
+  " Check vimproc {{{
+  try
+    call vimproc#version()
+  catch
+    let msg = 'Coqdo uses vimproc. You need to install vimproc!!'
+    echohl ErrorMsg | echo msg | echohl None
+    return
+  endtry " }}}
 
   " Set command {{{
   command! -buffer CoqdoQuit call coqdo#quit()
