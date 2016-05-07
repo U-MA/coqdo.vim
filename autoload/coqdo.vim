@@ -4,45 +4,52 @@ set cpo&vim
 let s:oldlinenr = 0
 let s:curlinenr = 0
 let s:match_id  = 0
+let s:output = ''
 
-function! s:async_run(input) abort " {{{
+augroup CoqdoAsyncRun
+augroup END
+
+function! s:async_run(input, is_silent) abort " {{{
   call s:proc.stdin.write(a:input)
 
   augroup CoqdoAsyncRun
-    execute 'autocmd! CursorHold,CursorHoldI * call'
-          \ 's:output_if_possible()'
+    execute 'autocmd! CursorHold,CursorHoldI * call s:output_if_possible(' . a:is_silent .')'
   augroup END
+
+  let s:updatetime = &updatetime
+  let &updatetime = 0
 endfunction " }}}
 
-function! s:read_messages() abort " {{{
-  let message_list = []
-  let buf = ''
-  while 1
-    if match(buf, '\(.\+ < \)\+$') != -1
-      let buf = s:proc.stdout.read(-1, 100)
-      if empty(buf)
-        break
+function! s:output_if_possible(is_silent) abort " {{{
+  let buf = s:proc.stdout.read(-1, 100)
+  if match(s:output, '\(.\+ < \)\+$') != -1
+    if empty(buf)
+      let buflist = split(s:output, '[[:cntrl:]]')
+      call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
+      call filter(buflist, "match(v:val, '.\\+ < ') == -1")
+
+      if !a:is_silent
+        let winnr = winnr()
+        execute bufwinnr(s:bufnr) 'wincmd w'
+        silent %delete _
+        call setline(1, buflist)
+        execute winnr 'wincmd w'
       endif
-    else
-      let buf = s:proc.stdout.read(-1, 100)
+
+      let s:output = ''
+
+      autocmd! CoqdoAsyncRun
+
+      let &updatetime = s:updatetime
+
+      call feedkeys('g\<ESC>', 'n')
+      return 1
     endif
+  endif
 
-    let buflist = split(buf, '[[:cntrl:]]')
-    " TODO 'theorem_name < theorem_name < fst' => 'fst'
-    call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
-    call filter(buflist, "match(v:val, '.\\+ < ') == -1")
-    call extend(message_list, buflist)
-  endwhile
-
-  return message_list
-endfunction " }}}
-
-function! s:print_message(lines) abort " {{{
-  let winnr = winnr()
-  execute bufwinnr(s:bufnr) 'wincmd w'
-  silent %delete _
-  call setline(1, a:lines)
-  execute winnr 'wincmd w'
+  let s:output .= buf
+  call feedkeys('g\<ESC>', 'n')
+  return 0
 endfunction " }}}
 
 function! coqdo#start() abort " {{{
@@ -53,8 +60,7 @@ function! coqdo#start() abort " {{{
   setlocal buftype=nofile noswapfile "TODO set other options
   wincmd p
 
-  let message_list = s:read_messages()
-  call s:print_message(message_list)
+  call s:async_run('', 0)
 endfunction "}}}
 
 function! coqdo#quit() abort " {{{
@@ -103,9 +109,7 @@ function! coqdo#goto(linenr) abort " {{{
 
   let line = getline(s:oldlinenr+1, a:linenr)
   let input = join(line, "\n") . "\n"
-  call s:proc.stdin.write(input)
-  let output = s:read_messages()
-  call s:print_message(output)
+  call s:async_run(input, 0)
 
   if s:match_id > 0
     call matchdelete(s:match_id)
@@ -122,10 +126,7 @@ function! coqdo#clear(is_silent) abort " {{{
   let s:oldlinenr = 0
   let s:curlinenr = 0
 
-  let message_list = s:read_messages()
-  if !a:is_silent
-    call s:print_message(message_list)
-  endif
+  call s:async_run('', a:is_silent)
 
   if s:match_id > 0
     let s:match_id = matchdelete(s:match_id)
@@ -163,15 +164,12 @@ function! coqdo#backward(linenr) abort " {{{
 
   let line = getline(s:oldlinenr+1, s:curlinenr)
   let input = join(line, "\n") . "\n"
-  call s:proc.stdin.write(input)
-  let output = s:read_messages()
+  call s:async_run(input, 1)
 endfunction " }}}
 
 function! coqdo#search_about(args) abort " {{{
   let input = 'SearchAbout "' . a:args . '".' . "\n"
-  call s:proc.stdin.write(input)
-  let output = s:read_messages()
-  call s:print_message(output)
+  call s:async_run(input, 0)
 endfunction " }}}
 
 let &cpo = s:save_cpo
