@@ -5,6 +5,15 @@ let s:oldlinenr = 0
 let s:curlinenr = 0
 let s:match_id  = 0
 
+function! s:async_run(input) abort " {{{
+  call s:proc.stdin.write(a:input)
+
+  augroup CoqdoAsyncRun
+    execute 'autocmd! CursorHold,CursorHoldI * call'
+          \ 's:output_if_possible()'
+  augroup END
+endfunction " }}}
+
 function! s:read_messages() abort " {{{
   let message_list = []
   let buf = ''
