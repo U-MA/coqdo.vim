@@ -42,7 +42,7 @@ function! s:output_if_possible(is_silent) abort " {{{
 
       let &updatetime = s:updatetime
 
-      call feedkeys('g\<ESC>', 'n')
+      call feedkeys("g\<ESC>", 'n')
       return 1
     endif
   endif
