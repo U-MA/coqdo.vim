@@ -9,6 +9,36 @@ let s:output = ''
 augroup CoqdoAsyncRun
 augroup END
 
+function! s:start_coptop(is_silent) abort " {{{
+  let s:oldlinenr = 0
+  let s:curlinenr = 0
+
+  let s:proc = vimproc#popen2('coqtop')
+
+  let output = ''
+  while 1
+    let buf = s:proc.stdout.read(-1, 100)
+    if match(output, '\(.\+ < \)\+$') != -1
+      if empty(buf)
+        let buflist = split(output, '[[:cntrl:]]')
+        call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
+        call filter(buflist, "match(v:val, '.\\+ < ') == -1")
+
+        if !a:is_silent
+          let winnr = winnr()
+          execute bufwinnr(s:bufnr) 'wincmd w'
+          silent %delete _
+          call setline(1, buflist)
+          execute winnr 'wincmd w'
+        endif
+
+        break
+      endif
+    endif
+    let output .= buf
+  endwhile
+endfunction " }}}
+
 function! s:async_run(input, is_silent) abort " {{{
   call s:proc.stdin.write(a:input)
 
@@ -53,14 +83,12 @@ function! s:output_if_possible(is_silent) abort " {{{
 endfunction " }}}
 
 function! coqdo#start() abort " {{{
-  let s:proc = vimproc#popen2('coqtop')
-
   rightbelow vnew
   let s:bufnr = bufnr('%')
   setlocal buftype=nofile noswapfile "TODO set other options
   wincmd p
 
-  call s:async_run('', 0)
+  call s:start_coptop(0)
 endfunction "}}}
 
 function! coqdo#quit() abort " {{{
@@ -121,12 +149,7 @@ function! coqdo#clear(is_silent) abort " {{{
   call s:proc.stdin.write("Quit.\n")
   call s:proc.waitpid()
 
-  let s:proc = vimproc#popen2('coqtop')
-
-  let s:oldlinenr = 0
-  let s:curlinenr = 0
-
-  call s:async_run('', a:is_silent)
+  call s:start_coptop(a:is_silent)
 
   if s:match_id > 0
     let s:match_id = matchdelete(s:match_id)
