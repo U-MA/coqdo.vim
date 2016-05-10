@@ -38,11 +38,13 @@ function! s:setup() abort " {{{
   " }}}
 
   " Set map {{{
-  nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
-  nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
-  nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
-  nnoremap <buffer> <silent> <LocalLeader>j :<C-u>CoqdoForward<CR>
-  nnoremap <buffer> <silent> <LocalLeader>k :<C-u>CoqdoBackward<CR>
+  if exists('g:coqdo_default_key_mapping')
+    nnoremap <buffer> <silent> <LocalLeader>q :<C-u>CoqdoQuit<CR>
+    nnoremap <buffer> <silent> <LocalLeader>g :<C-u>CoqdoGoto<CR>
+    nnoremap <buffer> <silent> <LocalLeader>c :<C-u>CoqdoClear<CR>
+    nnoremap <buffer> <silent> <LocalLeader>j :<C-u>CoqdoForward<CR>
+    nnoremap <buffer> <silent> <LocalLeader>k :<C-u>CoqdoBackward<CR>
+  endif
   " }}}
 
   augroup Coqdo

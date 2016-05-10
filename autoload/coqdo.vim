@@ -107,11 +107,13 @@ function! coqdo#quit() abort " {{{
   delcommand CoqdoForward
   delcommand CoqdoBackward
 
-  nunmap <buffer> <LocalLeader>q
-  nunmap <buffer> <LocalLeader>g
-  nunmap <buffer> <LocalLeader>c
-  nunmap <buffer> <LocalLeader>j
-  nunmap <buffer> <LocalLeader>k
+  if exists('g:coqdo_default_key_mapping')
+    nunmap <buffer> <LocalLeader>q
+    nunmap <buffer> <LocalLeader>g
+    nunmap <buffer> <LocalLeader>c
+    nunmap <buffer> <LocalLeader>j
+    nunmap <buffer> <LocalLeader>k
+  endif
 
   augroup Coqdo
     autocmd!
