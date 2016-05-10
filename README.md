@@ -44,11 +44,10 @@ coqtop with Vim.
 
   For example `let g:coqdo_default_key_mapping = 1`.
 
-  | Coqdo command   | key mapping      |
-  |:---------------:|:----------------:|
-  | `CoqdoQuit`     | `<LocalLeader>q` |
-  | `CoqdoGoto`     | `<LocalLeader>g` |
-  | `CoqdoClear`    | `<LocalLeader>c` |
-  | `CoqdoForward`  | `<LocalLeader>j` |
-  | `CoqdoBackward` | `<LocalLeader>k` |
-
+| Coqdo command   | key mapping      |
+|:---------------:|:----------------:|
+| `CoqdoQuit`     | `<LocalLeader>q` |
+| `CoqdoGoto`     | `<LocalLeader>g` |
+| `CoqdoClear`    | `<LocalLeader>c` |
+| `CoqdoForward`  | `<LocalLeader>j` |
+| `CoqdoBackward` | `<LocalLeader>k` |
