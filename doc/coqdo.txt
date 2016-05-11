@@ -1,0 +1,10 @@
+*coqdo.txt*	coqtop with Vim.
+
+Author : U-MA <g.0224incident@gmail.com>
+License: Vim License
+
+==============================================================================
+CONTENTS					*coqdo-contents*
+
+==============================================================================
+vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
