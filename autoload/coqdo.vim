@@ -39,18 +39,24 @@ function! s:start_coptop(is_silent) abort " {{{
   endwhile
 endfunction " }}}
 
-function! s:async_run(input, is_silent) abort " {{{
+function! s:async_run(input, is_silent, mode) abort " {{{
   call s:proc.stdin.write(a:input)
 
-  augroup CoqdoAsyncRun
-    execute 'autocmd! CursorHold,CursorHoldI * call s:output_if_possible(' . a:is_silent .')'
-  augroup END
+  if a:mode == 'n'
+    augroup CoqdoAsyncRun
+      execute 'autocmd! CursorHold  * call s:output_if_possible(' . a:is_silent .", 'n')"
+    augroup END
+  elseif a:mode == 'i'
+    augroup CoqdoAsyncRun
+      execute 'autocmd! CursorHoldI * call s:output_if_possible(' . a:is_silent .", 'i')"
+    augroup END
+  endif
 
   let s:updatetime = &updatetime
   let &updatetime = 0
 endfunction " }}}
 
-function! s:output_if_possible(is_silent) abort " {{{
+function! s:output_if_possible(is_silent, mode) abort " {{{
   let buf = s:proc.stdout.read(-1, 100)
   if match(s:output, '\(.\+ < \)\+$') != -1
     if empty(buf)
@@ -72,13 +78,23 @@ function! s:output_if_possible(is_silent) abort " {{{
 
       let &updatetime = s:updatetime
 
-      call feedkeys("g\<ESC>", 'n')
+      if a:mode == 'n'
+        echomsg a:mode
+        call feedkeys("g\<ESC>", 'n')
+      elseif a:mode == 'i'
+        echomsg a:mode
+        call feedkeys("\<C-g>\<ESC>", 'n')
+      endif
       return 1
     endif
   endif
 
   let s:output .= buf
-  call feedkeys('g\<ESC>', 'n')
+  if a:mode == 'n'
+    call feedkeys('g\<ESC>', 'n')
+  elseif a:mode == 'i'
+    call feedkeys("\<C-g>\<ESC>", 'n')
+  endif
   return 0
 endfunction " }}}
 
@@ -139,7 +155,7 @@ function! coqdo#goto(linenr) abort " {{{
 
   let line = getline(s:oldlinenr+1, a:linenr)
   let input = join(line, "\n") . "\n"
-  call s:async_run(input, 0)
+  call s:async_run(input, 0, 'n')
 
   if s:match_id > 0
     call matchdelete(s:match_id)
@@ -171,10 +187,10 @@ function! coqdo#backward_one() abort " {{{
     return
   endif
 
-  call coqdo#backward(s:curlinenr)
+  call coqdo#backward(s:curlinenr, 'n')
 endfunction " }}}
 
-function! coqdo#backward(linenr) abort " {{{
+function! coqdo#backward(linenr, mode) abort " {{{
   if a:linenr > s:curlinenr
     return
   endif
@@ -189,12 +205,12 @@ function! coqdo#backward(linenr) abort " {{{
 
   let line = getline(s:oldlinenr+1, s:curlinenr)
   let input = join(line, "\n") . "\n"
-  call s:async_run(input, 1)
+  call s:async_run(input, 1, a:mode)
 endfunction " }}}
 
 function! coqdo#search_about(args) abort " {{{
   let input = 'SearchAbout "' . a:args . '".' . "\n"
-  call s:async_run(input, 0)
+  call s:async_run(input, 0, 'n')
 endfunction " }}}
 
 let &cpo = s:save_cpo

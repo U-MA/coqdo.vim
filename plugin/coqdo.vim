@@ -49,7 +49,7 @@ function! s:setup() abort " {{{
 
   augroup Coqdo
     autocmd!
-    autocmd InsertEnter <buffer> call coqdo#backward(line('.'))
+    autocmd InsertEnter <buffer> call coqdo#backward(line('.'), 'i')
   augroup END
 
   hi def link coqdoEndLine Folded
