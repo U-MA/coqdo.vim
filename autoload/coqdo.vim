@@ -79,10 +79,8 @@ function! s:output_if_possible(is_silent, mode) abort " {{{
       let &updatetime = s:updatetime
 
       if a:mode == 'n'
-        echomsg a:mode
         call feedkeys("g\<ESC>", 'n')
       elseif a:mode == 'i'
-        echomsg a:mode
         call feedkeys("\<C-g>\<ESC>", 'n')
       endif
       return 1
