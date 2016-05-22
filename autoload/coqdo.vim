@@ -207,7 +207,12 @@ function! coqdo#backward(linenr, mode) abort " {{{
 endfunction " }}}
 
 function! coqdo#search_about(args) abort " {{{
-  let input = 'SearchAbout "' . a:args . '".' . "\n"
+  let input = 'SearchAbout ' . a:args . '.' . "\n"
+  call s:async_run(input, 0, 'n')
+endfunction " }}}
+
+function! coqdo#check(args) abort " {{{
+  let input = 'Check ' . a:args . '.' . "\n"
   call s:async_run(input, 0, 'n')
 endfunction " }}}
 
