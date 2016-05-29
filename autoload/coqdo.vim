@@ -216,5 +216,10 @@ function! coqdo#check(args) abort " {{{
   call s:async_run(input, 0, 'n')
 endfunction " }}}
 
+function! coqdo#print(args) abort " {{{
+  let input = 'Print ' . a:args . '.' . "\n"
+  call s:async_run(input, 0, 'n')
+endfunction " }}}
+
 let &cpo = s:save_cpo
 unlet s:save_cpo

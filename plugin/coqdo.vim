@@ -36,6 +36,7 @@ function! s:setup() abort " {{{
   command! -buffer CoqdoBackward call coqdo#backward_one()
   command! -buffer -nargs=1 CoqdoSearchAbout call coqdo#search_about(<args>)
   command! -buffer -nargs=1 CoqdoCheck call coqdo#check(<args>)
+  command! -buffer -nargs=1 CoqdoPrint call coqdo#print(<args>)
   " }}}
 
   " Set map {{{
