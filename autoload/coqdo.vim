@@ -69,6 +69,7 @@ function! s:output_if_possible(is_silent, mode) abort " {{{
         execute bufwinnr(s:bufnr) 'wincmd w'
         silent %delete _
         call setline(1, buflist)
+        normal G
         execute winnr 'wincmd w'
       endif
 
