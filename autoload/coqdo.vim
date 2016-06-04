@@ -39,16 +39,16 @@ function! s:start_coptop(is_silent) abort " {{{
   endwhile
 endfunction " }}}
 
-function! s:async_run(input, is_silent, mode) abort " {{{
+function! s:async_run(input, is_silent, mode, winnr) abort " {{{
   call s:proc.stdin.write(a:input)
 
   if a:mode == 'n'
     augroup CoqdoAsyncRun
-      execute 'autocmd! CursorHold  * call s:output_if_possible(' . a:is_silent .", 'n')"
+      execute 'autocmd! CursorHold  * call s:output_if_possible(' . a:is_silent .", 'n', " . a:winnr . ")"
     augroup END
   elseif a:mode == 'i'
     augroup CoqdoAsyncRun
-      execute 'autocmd! CursorHoldI * call s:output_if_possible(' . a:is_silent .", 'i')"
+      execute 'autocmd! CursorHoldI * call s:output_if_possible(' . a:is_silent .", 'i', " . a:winnr . ")"
     augroup END
   endif
 
@@ -56,7 +56,7 @@ function! s:async_run(input, is_silent, mode) abort " {{{
   let &updatetime = 0
 endfunction " }}}
 
-function! s:output_if_possible(is_silent, mode) abort " {{{
+function! s:output_if_possible(is_silent, mode, winnr) abort " {{{
   let buf = s:proc.stdout.read(-1, 100)
   if match(s:output, '\(.\+ < \)\+$') != -1
     if empty(buf)
@@ -66,7 +66,7 @@ function! s:output_if_possible(is_silent, mode) abort " {{{
 
       if !a:is_silent
         let winnr = winnr()
-        execute bufwinnr(s:bufnr) 'wincmd w'
+        execute bufwinnr(a:winnr) 'wincmd w'
         silent %delete _
         call setline(1, buflist)
         normal G
@@ -98,10 +98,16 @@ function! s:output_if_possible(is_silent, mode) abort " {{{
 endfunction " }}}
 
 function! coqdo#start() abort " {{{
+  let s:mainbufnr = bufnr('%')
+
   rightbelow vnew
   let s:bufnr = bufnr('%')
   setlocal buftype=nofile noswapfile "TODO set other options
-  wincmd p
+
+  rightbelow new
+  let s:msgbufnr = bufnr('%')
+  setlocal buftype=nofile noswapfile "TODO set other options
+  execute s:mainbufnr 'wincmd w'
 
   call s:start_coptop(0)
 endfunction "}}}
@@ -110,8 +116,11 @@ function! coqdo#quit() abort " {{{
   call s:proc.stdin.write("Quit.\n")
   call s:proc.waitpid()
 
+  let msgwinnr = bufwinnr(s:msgbufnr)
   let winnr = bufwinnr(s:bufnr)
   let curwinnr = winnr()
+  execute msgwinnr 'wincmd w'
+  close
   execute winnr 'wincmd w'
   close
   execute curwinnr 'wincmd w'
@@ -154,7 +163,7 @@ function! coqdo#goto(linenr) abort " {{{
 
   let line = getline(s:oldlinenr+1, a:linenr)
   let input = join(line, "\n") . "\n"
-  call s:async_run(input, 0, 'n')
+  call s:async_run(input, 0, 'n', s:bufnr)
 
   if s:match_id > 0
     call matchdelete(s:match_id)
@@ -204,22 +213,22 @@ function! coqdo#backward(linenr, mode) abort " {{{
 
   let line = getline(s:oldlinenr+1, s:curlinenr)
   let input = join(line, "\n") . "\n"
-  call s:async_run(input, 1, a:mode)
+  call s:async_run(input, 1, a:mode, s:bufnr)
 endfunction " }}}
 
 function! coqdo#search_about(args) abort " {{{
   let input = 'SearchAbout ' . a:args . '.' . "\n"
-  call s:async_run(input, 0, 'n')
+  call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
 
 function! coqdo#check(args) abort " {{{
   let input = 'Check ' . a:args . '.' . "\n"
-  call s:async_run(input, 0, 'n')
+  call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
 
 function! coqdo#print(args) abort " {{{
   let input = 'Print ' . a:args . '.' . "\n"
-  call s:async_run(input, 0, 'n')
+  call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
 
 let &cpo = s:save_cpo
