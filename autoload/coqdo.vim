@@ -66,7 +66,7 @@ function! s:output_if_possible(is_silent, mode, winnr) abort " {{{
 
       if !a:is_silent
         let winnr = winnr()
-        execute bufwinnr(a:winnr) 'wincmd w'
+        execute a:winnr 'wincmd w'
         silent %delete _
         call setline(1, buflist)
         normal G
@@ -216,25 +216,39 @@ function! coqdo#backward(linenr, mode) abort " {{{
   call s:async_run(input, 1, a:mode, s:bufnr)
 endfunction " }}}
 
+function! coqdo#msg_open() abort " {{{
+  if !s:msgbufnr
+    execute s:bufnr 'wincmd w'
+    rightbelow new
+    setlocal buftype=nofile noswapfile "TODO set other options
+    let s:msgbufnr = winnr()
+    execute s:mainbufnr 'wincmd w'
+  endif
+endfunction " }}}
+
 function! coqdo#msg_close() abort " {{{
   if s:msgbufnr
     execute s:msgbufnr 'wincmd w'
     close
+    let s:msgbufnr = 0
     execute s:mainbufnr 'wincmd w'
   endif
 endfunction " }}}
 
 function! coqdo#search_about(args) abort " {{{
+  call coqdo#msg_open()
   let input = 'SearchAbout ' . a:args . '.' . "\n"
   call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
 
 function! coqdo#check(args) abort " {{{
+  call coqdo#msg_open()
   let input = 'Check ' . a:args . '.' . "\n"
   call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
 
 function! coqdo#print(args) abort " {{{
+  call coqdo#msg_open()
   let input = 'Print ' . a:args . '.' . "\n"
   call s:async_run(input, 0, 'n', s:msgbufnr)
 endfunction " }}}
