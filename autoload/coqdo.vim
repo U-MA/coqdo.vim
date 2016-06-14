@@ -216,6 +216,14 @@ function! coqdo#backward(linenr, mode) abort " {{{
   call s:async_run(input, 1, a:mode, s:bufnr)
 endfunction " }}}
 
+function! coqdo#msg_close() abort " {{{
+  if s:msgbufnr
+    execute s:msgbufnr 'wincmd w'
+    close
+    execute s:mainbufnr 'wincmd w'
+  endif
+endfunction " }}}
+
 function! coqdo#search_about(args) abort " {{{
   let input = 'SearchAbout ' . a:args . '.' . "\n"
   call s:async_run(input, 0, 'n', s:msgbufnr)
