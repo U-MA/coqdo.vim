@@ -34,6 +34,7 @@ function! s:setup() abort " {{{
   command! -buffer CoqdoClear call coqdo#clear(0)
   command! -buffer CoqdoForward call coqdo#forward()
   command! -buffer CoqdoBackward call coqdo#backward_one()
+  command! -buffer CoqdoMsgClose call coqdo#msg_close()
   command! -buffer -nargs=1 CoqdoSearchAbout call coqdo#search_about(<args>)
   command! -buffer -nargs=1 CoqdoCheck call coqdo#check(<args>)
   command! -buffer -nargs=1 CoqdoPrint call coqdo#print(<args>)
