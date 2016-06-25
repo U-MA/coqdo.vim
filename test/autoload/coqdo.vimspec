@@ -1,0 +1,19 @@
+Describe CoqdoScriptLocal
+  Before all
+    let SL = vital#of('vital').import('Vim.ScriptLocal')
+    let U = SL.sfuncs('autoload/coqdo.vim')
+  End
+
+  It .find_theorem_name(string)
+    Assert Equals(U.find_theorem_name('Theorem sample :'), 'sample')
+
+    Assert Equals(U.find_theorem_name('Theorem sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Lemma sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Remark sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Fact sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Corollary sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Proposition sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Definition sample:'), 'sample')
+    Assert Equals(U.find_theorem_name('Example sample:'), 'sample')
+  End
+End
