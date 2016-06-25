@@ -1,0 +1,9 @@
+call themis#option('recursive', 1)
+
+let g:Expect = themis#helper('expect')
+call themis#helper('command').with(themis#helper('assert')).with({ 'Expect': g:Expect })
+
+let g:root = fnamemodify(expand('<sfile>'), ':h:h')
+
+" For unit test of script local function
+call themis#option('runtimepath', expand('~/.vim/bundle/vital.vim'))

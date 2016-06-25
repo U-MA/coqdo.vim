@@ -5,6 +5,8 @@ let s:oldlinenr = 0
 let s:curlinenr = 0
 let s:match_id  = 0
 let s:output = ''
+let s:last_theorem_name = ''
+let s:proof = ''
 
 augroup CoqdoAsyncRun
 augroup END
@@ -40,6 +42,10 @@ function! s:start_coptop(is_silent) abort " {{{
 endfunction " }}}
 
 function! s:async_run(input, is_silent, mode, winnr) abort " {{{
+  let ltn = s:find_theorem_name(a:input)
+  if ltn !=# s:last_theorem_name
+    let s:proof = ltn
+  endif
   call s:proc.stdin.write(a:input)
 
   if a:mode == 'n'
@@ -62,7 +68,12 @@ function! s:output_if_possible(is_silent, mode, winnr) abort " {{{
     if empty(buf)
       let buflist = split(s:output, '[[:cntrl:]]')
       call map(buflist, "matchstr(v:val, '\\(\\(Coq < \\)*\\)\\zs.\\+')")
-      call filter(buflist, "match(v:val, '.\\+ < ') == -1")
+      call filter(buflist, "match(v:val, 'Coq < ') == -1")
+      call filter(buflist, "match(v:val, 'Unnamed_thm\d* < ') == -1")
+      if !empty(s:proof)
+        let tmp = "match(v:val, \"" . s:proof . " < \") == -1"
+        call filter(buflist, tmp)
+      endif
 
       if !a:is_silent
         let winnr = winnr()
@@ -95,6 +106,10 @@ function! s:output_if_possible(is_silent, mode, winnr) abort " {{{
     call feedkeys("\<C-g>\<ESC>", 'n')
   endif
   return 0
+endfunction " }}}
+
+function! s:find_theorem_name(string) abort " {{{
+  return matchstr(a:string, '.*\zs\(Theorem\|Lemma\|Remark\|Fact\|Corollary\|Proposition\|Definition\|Example\)\s\+\zs\S\+\ze\s*:')
 endfunction " }}}
 
 function! coqdo#start() abort " {{{
