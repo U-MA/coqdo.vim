@@ -4,16 +4,22 @@ Describe CoqdoScriptLocal
     let U = SL.sfuncs('autoload/coqdo.vim')
   End
 
-  It .find_theorem_name(string)
-    Assert Equals(U.find_theorem_name('Theorem sample :'), 'sample')
+  Describe .find_theorem_name(string)
+    It find theorem name
+      Assert Equals(U.find_theorem_name('Theorem sample :'), 'sample')
 
-    Assert Equals(U.find_theorem_name('Theorem sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Lemma sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Remark sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Fact sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Corollary sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Proposition sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Definition sample:'), 'sample')
-    Assert Equals(U.find_theorem_name('Example sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Theorem sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Lemma sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Remark sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Fact sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Corollary sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Proposition sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Definition sample:'), 'sample')
+      Assert Equals(U.find_theorem_name('Example sample:'), 'sample')
+    End
+
+    It find last theorem name
+      Assert Equals(U.find_theorem_name('Theorem first : Admitted. Theorem second : Admitted.'), 'second')
+    End
   End
 End

@@ -98,7 +98,7 @@ function! s:output_if_possible(is_silent, mode, winnr) abort " {{{
 endfunction " }}}
 
 function! s:find_theorem_name(string) abort " {{{
-  return matchstr(a:string, '\(Theorem\|Lemma\|Remark\|Fact\|Corollary\|Proposition\|Definition\|Example\)\s\+\zs\S\+\ze\s*:')
+  return matchstr(a:string, '.*\zs\(Theorem\|Lemma\|Remark\|Fact\|Corollary\|Proposition\|Definition\|Example\)\s\+\zs\S\+\ze\s*:')
 endfunction " }}}
 
 function! coqdo#start() abort " {{{
